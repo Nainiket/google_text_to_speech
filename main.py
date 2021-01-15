@@ -33,7 +33,7 @@ def download(file_name, input_text, language, input_pitch, input_speed, voice_na
     audio_config = texttospeech.AudioConfig(
         audio_encoding=texttospeech.AudioEncoding.MP3,
         pitch=int(input_pitch),
-        # speakingRate=int(input_speed),
+        speaking_rate=int(input_speed),
     )
 
     # Perform the text-to-speech request on the text input with the selected
