@@ -1,0 +1,6 @@
+
+<select required name="available_voices" id="available_voices">
+    {% for available_voices in all_available_voice_names %}
+        <option value="{{ available_voices }}">{{ available_voices }}</option>
+    {% endfor %}
+</select>
