@@ -1,0 +1,9 @@
+
+<div id="audioWrapper">
+    <br>
+    <p style="overflow: hidden;" >{{ input_param }}</p>
+    <audio id="myAudio" controls>
+        <source src="{{ url_for('streammp3') }}" type="audio/mpeg" />
+        Your browser does not support this audio format.
+    </audio>
+</div>

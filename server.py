@@ -1,6 +1,5 @@
-
-from main import download
-from flask import Flask, render_template, request, redirect, jsonify
+from main import speak
+from flask import Flask, render_template, request, redirect, jsonify, Response
 # from form import RegistrationForm
 import os
 from datetime import datetime
@@ -12,15 +11,41 @@ from api import list_voices_by_language_code_and_gender, list_voices, all_langua
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/', methods = ['GET','POST'])
 def home():
-    genders = ['NEUTRAL','FEMALE','MALE']
-    Languages=[]
-    for language_code in all_languages():
-        a = [language_code,Language_name(language_code)]
-        Languages.append(a)
-    return render_template('index.html', languages=Languages, genders = genders)  
-   
+    if request.method == 'GET':
+        print(request.method)
+        genders = ['NEUTRAL','MALE']
+        Languages=[]
+        for language_code in all_languages():
+            a = [language_code,Language_name(language_code)]
+            Languages.append(a)
+        return render_template('index.html', languages=Languages, genders = genders)
+
+    elif request.method == 'POST':
+        print(request.method)
+        input_text = request.form['input_text']
+        language = request.form['language']
+        input_pitch = request.form['pitch_value']
+        input_speed = request.form['speed_value']
+        voice_name = request.form['available_voices']
+        input_param = input_text, language, input_pitch, input_speed, voice_name
+        speak(input_text, language, input_pitch, input_speed, voice_name)
+        print('rendering audio.html')
+        return jsonify({'data': render_template('audio.html', input_param= input_param)})
+
+    else:
+        return "Invalid Request"
+        
+@app.route('/mp3')
+def streammp3():
+    def generate():
+        with open("temp.mp3", "rb") as fmp3:
+            data = fmp3.read(1024)
+            while data:
+                yield data
+                data = fmp3.read(1024)
+    return Response(generate(), mimetype="audio/mp3")
 
 
 @app.route('/getdata', methods = ['POST'])
@@ -34,21 +59,5 @@ def getdata():
         return jsonify({'data': render_template('getdata.html', all_available_voice_names=all_available_voice_names)})        
 
 
-@app.route('/download', methods = ['POST'])
-def download_file():
-    if request.method == 'POST':
-        file_name = request.form['file_name']
-        input_text = request.form['input_text']
-        language = request.form['language']
-        input_pitch = request.form['pitch_value']
-        input_speed = request.form['speed_value']
-        voice_name = request.form['available_voices']
-        # print(file_name, input_text, language, input_pitch, input_speed, voice_name)
-        download(file_name, input_text, language, input_pitch, input_speed, voice_name)
-        return "File Downloaded with name: " + file_name
-    else:
-        return "Invalid Request"
-
-
 if __name__ == '__main__':
-    app.run(debug = False)
+    app.run(debug = True)

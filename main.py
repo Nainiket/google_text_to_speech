@@ -7,6 +7,7 @@ Note: ssml must be well-formed according to:
 
 from datetime import datetime
 from google.cloud import texttospeech
+from flask import Response
 
 import os
 try:
@@ -15,9 +16,7 @@ except:
     print("Please put or VERIFY the config file in config_key.json")
 
 
-
-def download(file_name, input_text, language, input_pitch, input_speed, voice_name):
-
+def speak(input_text, language, input_pitch, input_speed, voice_name):
     # Instantiates a client
     client = texttospeech.TextToSpeechClient()
 
@@ -33,7 +32,7 @@ def download(file_name, input_text, language, input_pitch, input_speed, voice_na
     audio_config = texttospeech.AudioConfig(
         audio_encoding=texttospeech.AudioEncoding.MP3,
         pitch=int(input_pitch),
-        speaking_rate=int(input_speed),
+        speaking_rate=float(input_speed),
     )
 
     # Perform the text-to-speech request on the text input with the selected
@@ -42,14 +41,7 @@ def download(file_name, input_text, language, input_pitch, input_speed, voice_na
         input=synthesis_input, voice=voice, audio_config=audio_config
     )
 
-
-    # The response's audio_content is binary.
-    downloads = os.path.join( os.getenv('USERPROFILE'), 'Downloads',file_name + ".mp3")
-    with open(downloads, "wb") as out:
-        # Write the response to the output file.
+    with open("temp.mp3", "wb") as out:
+    # Write the response to the output file.
         out.write(response.audio_content)
-        print('Audio content written to file: ' + downloads)
-
-
-
-
+        print('File Created')

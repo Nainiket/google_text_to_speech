@@ -3,46 +3,61 @@
 {% block content %}
 
 <div class="formwrapper">
-  <h2 class="title"> Google - Text to Speech</h2>
-  <form method="POST" action="/download">
-      <div class="form-field">
-      <form action="/download" method="POST">
+  <h1 style="text-align: center;" class="container" >Google Text to Speech</h1>
+  <form method="POST" id="form" action="/">
+    <div style="padding: 3% 3% 3% 3%;" class="row">
 
-        <!-- input text  -->
-        <div>
-          <label for="input_text">Text to Speak:</label><br>
-          <textarea id="input_text" rows="25" cols="100" name="input_text" required></textarea><br>
-        </div><br>
+      <!-- input text  -->
+      <div class="col-sm-5" style="text-align: left; padding: 1% 1% 1% 1%">
+        <label for="input_text"> <b> Enter the text here: </b></label>
+        <textarea id="input_text" rows="20" cols="80" name="input_text" required>Hello World</textarea><br>
+      </div><br>
+
+      <!-- float right  -->
+      <div class="col-sm-3" style="text-align: center; padding: 1% 1% 1% 1%">
 
         <!-- language  -->
-        <div>
-          <label for="language">Language:</label>
-          <select id="language" name="language" >
-            {% for lang in languages %}
-              <option value="{{ lang[0] }}">{{ lang[1] }} {{ lang[0] }}</option>
-            {% endfor %}
-          </select>
+        <div style="text-align: left;">
+        <label for="language"><b>Language:</b></label>
+        <select id="language" name="language" >
+          <option value="en-US" selected="selected"> English (Unites States) en-US</option>
+          {% for lang in languages %}
+            <option value="{{ lang[0] }}">{{ lang[1] }} {{ lang[0] }}</option>
+          {% endfor %}
+        </select>
+        </div>
 
-          <!-- gender  -->
-          <label for="gender">Gender:</label>
-          <select name="gender" id="gender">
-            {% for gender in genders %}
-              <option value="{{ gender }}">{{ gender }}</option>
-            {% endfor %}
-          </select>
+        <br>
 
-          <!-- Available Voices  -->
-          <div>
-            <label for="available_voices">Available Voices:</label>
-            <div required id="available_voices">
-              <select required></select>
-            </div>
+        <!-- gender  -->
+        <div style="text-align: left;">
+        <label for="gender"><b>Gender:</b></label>
+        <select name="gender" id="gender">
+          <option value="FEMALE" selected="selected"> FEMALE </option>
+          {% for gender in genders %}
+            <option value="{{ gender }}">{{ gender }}</option>
+          {% endfor %}
+        </select>
+        </div>
+
+        <br>
+
+        <!-- Available Voices  -->
+        <div style="text-align: left;">
+          <label for="available_voices"><b>Available Voices:</b></label>
+          <div required id="available_voices">
+            <select required name="available_voices">
+              <option value="en-US-Standard-H">en-US-standard-H</option>
+            </select>
           </div>
+
+          <!-- Script for getting all available_voices  -->
+
           <script>
             $('#language, #gender').change(function(){
               var selected_lang = $('#language').val();
               var selected_gender = $('#gender').val();
-              $.ajax({ 
+              $.ajax({
                   url: "{{ url_for('getdata') }}",
                   data: { selected_lang: selected_lang, selected_gender: selected_gender },
                   type: 'post'
@@ -55,37 +70,34 @@
               });
             });
           </script>
+        </div>
 
+        <br>
 
-        </div><br>
-
-        <!-- file name  -->
-        <div>
-          <label for="file_name">Enter the name of file to save as:</label>
-          <input type="text" name="file_name" id="file_name" required>
-        </div><br>
 
         <!-- Pitch  -->
-        <div>
-          <label for="pitch">Pitch</label>
+        <div style="text-align: left;">
+          <label for="pitch"><b>Pitch:</b></label>
           <div>
             <input name="pitch_value" id="pitch" step="1" type="range" min="-20" max="20" value="0">
             <p>Pitch: <span id="pitch_value" ></span></p>
-          </div> 
+          </div>
           <script>
           var pitch_slider = document.getElementById("pitch");
           var pitch_output = document.getElementById("pitch_value");
           pitch_output.innerHTML = pitch_slider.value;
-          
+
           pitch_slider.oninput = function() {
             pitch_output.innerHTML = this.value;
           }
           </script>
         </div>
 
+        <br>
+
         <!-- Speed  -->
-        <div>
-          <label for="speed">Speed</label>
+        <div style="text-align: left;">
+          <label for="speed"><b>Speed:</b></label>
           <div>
             <input name="speed_value" id="speed" type="range" step="0.01" min="0.25" max="4.00" value="1">
             <p>Speed: <span id="speed_value" ></span></p>
@@ -94,23 +106,65 @@
           var speed_slider = document.getElementById("speed");
           var speed_output = document.getElementById("speed_value");
           speed_output.innerHTML = speed_slider.value;
-          
           speed_slider.oninput = function() {
             speed_output.innerHTML = this.value;
           }
           </script>
         </div>
 
-        <!-- Submit  -->
-        <div>
-          <input type="submit" value="Download"></input>
+        <br>
+
+        <!-- submit  -->
+        <div style="text-align: left;">
+          <button class="btn btn-outline-primary" id="submit" value="Speak"><b>Speak</b></button>
         </div>
 
-      </form>          
+        <br>
+
       </div>
-      <div>
+      
+      <!-- Play element  -->
+      <div class="col-sm-4" style="text-align: center; padding: 1% 1% 1% 1%">
+
+
+        <div class="spinner-border" style="display: none; " id="loading" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+
+        <br>
+        
+        <div id="audioWrapper" ></div>
+
+        <script>
+          $('#form').submit(function(e){
+            e.preventDefault();
+            var msg = new SpeechSynthesisUtterance();
+            var form = $(this);
+            var url = form.attr('action');
+            var type = form.attr('method');
+          $.ajax({
+                  url: url,
+                  type: type,
+                  data: $("#form").serialize(),
+                  beforeSend: function(){
+                    $('#loading').show();
+                  },
+                  complete: function(){
+                    $('#loading').hide();
+                  },
+              }).done(function(resp) {
+                $('#audioWrapper').prepend(resp.data);
+              }).fail(function() {
+                alert('Failed');
+              });
+            });
+        </script>
+
+      </div>
+
     </div>
   </form>
+
 </div>
 
 
