@@ -44,4 +44,4 @@ def speak(input_text, language, input_pitch, input_speed, voice_name):
     with open("temp.mp3", "wb") as out:
     # Write the response to the output file.
         out.write(response.audio_content)
-        print('File Created')
+        # print('File Created')

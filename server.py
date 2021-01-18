@@ -23,7 +23,6 @@ def home():
         return render_template('index.html', languages=Languages, genders = genders)
 
     elif request.method == 'POST':
-        print(request.method)
         input_text = request.form['input_text']
         language = request.form['language']
         input_pitch = request.form['pitch_value']
@@ -31,7 +30,6 @@ def home():
         voice_name = request.form['available_voices']
         input_param = input_text, language, input_pitch, input_speed, voice_name
         speak(input_text, language, input_pitch, input_speed, voice_name)
-        print('rendering audio.html')
         return jsonify({'data': render_template('audio.html', input_param= input_param)})
 
     else:
@@ -60,4 +58,4 @@ def getdata():
 
 
 if __name__ == '__main__':
-    app.run(debug = True)
+    app.run(debug = False)
